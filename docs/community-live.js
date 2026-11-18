@@ -9,7 +9,7 @@
   root.className = 'social-community';
   root.innerHTML = `<header class="social-header"><h2>Comunidade</h2>
     <button class="add-btn" type="button" id="liveCompose">Escrever relato</button></header>
-    <p class="social-demo-note">Relatos aprovados aparecem para as pessoas conectadas. Use o modo anônimo se preferir e evite incluir dados pessoais.</p>
+    <p class="social-demo-note">Relatos em texto aparecem no mural após a análise automática. Use o modo anônimo se preferir e evite incluir dados pessoais.</p>
     <div class="social-dialog-actions">
       <button class="select-small" id="liveReload" type="button">Atualizar mural</button>
       <button class="select-small" id="liveReview" type="button" hidden>Revisar relatos</button>
@@ -23,9 +23,9 @@
         <label>Relato<textarea name="body" rows="5" maxlength="1200" required></textarea></label>
         <label>Tema<select name="topic"><option value="dia-a-dia">Meu dia</option><option value="pequena-vitoria">Pequena vitória</option><option value="rotina">Rotina</option><option value="dia-dificil">Dia difícil</option><option value="quero-desabafar">Desabafo</option></select></label>
         <label><span><input type="checkbox" name="anonymous" checked> Publicar anonimamente</span></label>
-        <label><span><input type="checkbox" name="consent" required> Concordo que o relato seja enviado à OpenAI para moderação automática e à equipe para revisão. Após aprovação, ele aparecerá no mural.</span></label>
+        <label><span><input type="checkbox" name="consent" required> Concordo com o envio do texto à OpenAI para análise automática e com a publicação no mural se o texto for aceito.</span></label>
         <p id="liveError" class="social-error" role="status"></p>
-        <div class="social-dialog-actions"><button type="button" class="select-small" id="liveCancel">Cancelar</button><button type="submit" class="add-btn">Enviar para revisão</button></div>
+        <div class="social-dialog-actions"><button type="button" class="select-small" id="liveCancel">Cancelar</button><button type="submit" class="add-btn">Publicar relato</button></div>
       </form>
     </dialog>`;
   page.append(root);
@@ -145,7 +145,7 @@
     const displayName = (window.mpAccountName || '').trim().slice(0, 32);
     if (!body) { error.textContent = 'Escreva um relato antes de enviar.'; return; }
     submit.disabled = true;
-    error.textContent = 'Enviando para revisão…';
+    error.textContent = 'Publicando…';
     try {
       const result = await request('/functions/v1/community-submit', {
         method: 'POST',
@@ -158,7 +158,13 @@
       if (!result?.ok) throw new Error(result?.error || 'Não foi possível enviar o relato.');
       form.reset();
       dialog.close();
-      status.textContent = 'Relato enviado. Ele aparece no mural depois de aprovado.';
+      if (result.published) {
+        status.textContent = 'Relato publicado no mural.';
+        try { await loadPosts(); }
+        catch { status.textContent = 'Relato publicado. Toque em Atualizar mural para vê-lo.'; }
+      } else {
+        status.textContent = 'Relato enviado para revisão.';
+      }
     } catch (e) { error.textContent = e.message; }
     finally { submit.disabled = false; }
   });

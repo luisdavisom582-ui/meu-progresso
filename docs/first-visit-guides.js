@@ -12,7 +12,7 @@
       'No diário, escolha a data, escreva sua anotação e salve.'],
     community: ['Comunidade', 'Explore o feed de relatos e encontre temas que interessam a você.',
       'Toque em “Escrever relato” para enviar um relato, com opção de anonimato.',
-      'Após a revisão, seu relato aparece no mural das outras contas.'],
+      'Se aceito na análise automática, o texto aparece no mural das outras contas.'],
     myProfile: ['Meu perfil', 'Personalize seu espaço na comunidade.',
       'Escolha um nome de usuário e como quer ser chamado.',
       'Adicione uma descrição, se quiser, e salve. Seu perfil começa privado.'],
