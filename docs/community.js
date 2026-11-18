@@ -378,8 +378,15 @@ document.getElementById('communityProfileForm').addEventListener('submit', async
     return;
   }
   if (!currentUser || !authClient) {
-    status.textContent = 'Entre na sua conta para salvar sua personalização entre dispositivos.';
-    setAuthMode('login'); authModal.classList.add('open');
+    const localProfile = { ...next, is_public: false, show_in_posts: false, avatar_path: null, banner_path: null };
+    try {
+      window.mpAccountStorage.setItem('mp_community_profile', JSON.stringify(localProfile));
+      communityProfile = localProfile;
+      renderCommunityProfile();
+      status.textContent = 'Perfil salvo para sua conta neste navegador.';
+    } catch {
+      status.textContent = 'Não consegui salvar o perfil neste navegador.';
+    }
     return;
   }
   const saveButton = event.submitter;
@@ -516,7 +523,6 @@ document.getElementById('communityForm').addEventListener('submit', async event 
   const status = document.getElementById('communityStatus');
   if (!currentUser || !authClient) {
     status.textContent = 'Entre ou crie uma conta para enviar um relato.';
-    setAuthMode('login'); authModal.classList.add('open');
     return;
   }
   if (!document.getElementById('communityConsent').checked) {
@@ -592,8 +598,7 @@ document.getElementById('communityFeed').addEventListener('click', async event =
   const deleteButton = event.target.closest('[data-delete-post]');
   if (!report && !react && !deleteButton) return;
   if (!currentUser || !authClient) {
-    setAuthMode('login'); authModal.classList.add('open');
-    document.getElementById('authMessage').textContent = 'Entre na sua conta para usar esta opção.';
+    document.getElementById('communityStatus').textContent = 'Use os botões do mural atual para interagir.';
     return;
   }
   const button = report || react || deleteButton;
