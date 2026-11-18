@@ -48,7 +48,7 @@ body.dark-mode .urgent-panel{background:#1b2420;border-color:#46554a;color:var(-
 @media(max-width:700px){.cookie-notice{left:10px;bottom:80px;width:calc(100vw - 20px);padding:14px}.cookie-actions>*{flex:1}.legal-footer{padding-bottom:8px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style><link rel="stylesheet" href="editorial.css">
-<style>.demo-notice{padding:12px 20px;background:#e4ecdf;border-bottom:1px solid #c2d0bc;color:#30452f;text-align:center;font:13px/1.6 system-ui}.demo-notice strong{font-weight:700}#accountButton{display:none!important}</style><style>body.entry-locked > :not(#entryGate),#entryGate[hidden]{display:none!important}</style><link rel="stylesheet" href="./entrada.css"><script src="./entrada.js" defer></script></head>
+<style>.demo-notice{padding:12px 20px;background:#e4ecdf;border-bottom:1px solid #c2d0bc;color:#30452f;text-align:center;font:13px/1.6 system-ui}.demo-notice strong{font-weight:700}#accountButton{display:none!important}</style><style>body.entry-locked > :not(#entryGate),#entryGate[hidden]{display:none!important}</style><link rel="stylesheet" href="./entrada.css"><script src="./entrada.js?v=18" defer></script></head>
 <body class="entry-locked">
 <main id="entryGate" aria-labelledby="entryTitle">
  <div class="entry-card">
@@ -62,6 +62,7 @@ body.dark-mode .urgent-panel{background:#1b2420;border-color:#46554a;color:var(-
     <label>E-mail<input name="email" type="email" autocomplete="username" required maxlength="254"></label>
     <label>Senha<input name="password" type="password" autocomplete="current-password" required maxlength="128"></label>
     <label class="entry-agreement" id="entryTerms" hidden><input name="terms" type="checkbox"> <span>Li e aceito os <a href="./termos.html" target="_blank" rel="noopener">Termos de Uso</a> e li a <a href="./privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label>
+    <label class="entry-agreement" id="entryRemember"><input name="remember" type="checkbox" checked> <span>Manter minha conta conectada neste navegador</span></label>
     <button class="entry-submit" type="submit">Entrar</button>
    </fieldset>
   </form>

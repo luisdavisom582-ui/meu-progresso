@@ -11,6 +11,7 @@
   const logout = document.getElementById('entryLogout');
   const home = new URL('./', location.href).href;
   let session;
+  let remember = false;
   let creating = false;
 
   async function auth(path, { body, token, keepalive = false } = {}) {
@@ -34,6 +35,7 @@
 
   function setMode(signup) {
     creating = signup;
+    document.getElementById('entryRemember').hidden = signup;
     document.getElementById('entryTitle').textContent = signup ? 'Crie sua conta' : 'Entre na sua conta';
     document.getElementById('entryIntro').textContent = signup ? 'Seu nome e e-mail ficam vinculados à conta no Supabase. Seu diário e suas metas ficam neste navegador.' : 'Entre para acessar seu espaço.';
     document.getElementById('nameField').hidden = !signup;
@@ -46,15 +48,42 @@
     toggle.textContent = signup ? 'Já tenho conta' : 'Criar uma conta';
   }
 
+  function readSession(storage) {
+    try {
+      const saved = JSON.parse(storage.getItem(sessionKey) || 'null');
+      return saved?.access_token && saved?.refresh_token ? saved : null;
+    } catch { return null; }
+  }
+  function clearSaved(storage) {
+    try { storage.removeItem(sessionKey); } catch {}
+  }
   function storeSession() {
-    try { sessionStorage.setItem(sessionKey, JSON.stringify(session)); } catch {}
+    const tokens = JSON.stringify({
+      access_token: session.access_token,
+      refresh_token: session.refresh_token
+    });
+    if (remember) {
+      try {
+        localStorage.setItem(sessionKey, tokens);
+        clearSaved(sessionStorage);
+        return;
+      } catch {}
+    }
+    try { sessionStorage.setItem(sessionKey, tokens); } catch {}
   }
   function forgetSession() {
     const token = session?.access_token;
     session = undefined;
-    try { sessionStorage.removeItem(sessionKey); } catch {}
+    clearSaved(sessionStorage);
+    if (remember) clearSaved(localStorage);
     return token;
   }
+  window.addEventListener('storage', event => {
+    if (remember && event.storageArea === localStorage && event.key === sessionKey && !event.newValue) {
+      session = undefined;
+      location.replace(home);
+    }
+  });
   async function enter(user) {
     if (typeof user?.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(user.id)) throw new Error('Sessão inválida.');
     const prefix = 'mp:account:' + user.id + ':';
@@ -114,13 +143,14 @@
         form.elements.terms.checked = false;
         status.textContent = 'Confira seu e-mail para confirmar o cadastro. Depois, volte aqui e entre com sua senha.';
       } else {
+        remember = form.elements.remember.checked;
         session = await auth('token?grant_type=password', { body });
         const user = await auth('user', { token: session.access_token });
+        if (!remember) clearSaved(localStorage);
         storeSession();
         await enter(user);
       }
     } catch (error) {
-      forgetSession();
       if (form.hidden) {
         status.textContent = 'Não consegui carregar o aplicativo. Recarregue a página para tentar de novo.';
         return;
@@ -137,6 +167,7 @@
   });
   logout.addEventListener('click', () => {
     const token = forgetSession();
+    clearSaved(localStorage);
     if (token) void auth('logout?scope=local', { token, keepalive: true }).catch(() => {});
     location.replace(home);
   });
@@ -146,21 +177,43 @@
     const fromEmail = callback.has('access_token') || callback.has('error') ||
       new URL(location.href).searchParams.has('code');
     if (fromEmail) history.replaceState(null, '', home);
-    try { session = JSON.parse(sessionStorage.getItem(sessionKey) || 'null'); } catch {}
-    if (session?.access_token && session?.refresh_token) {
+    const persistent = readSession(localStorage);
+    remember = Boolean(persistent);
+    session = persistent || readSession(sessionStorage);
+    if (session) {
       let user;
-      try {
-        try { user = await auth('user', { token: session.access_token }); }
+      const validate = async () => {
+        if (remember) {
+          session = readSession(localStorage);
+          if (!session) return null;
+        }
+        try { return await auth('user', { token: session.access_token }); }
         catch (error) {
           if (error.status !== 401 && error.status !== 403) throw error;
-          session = await auth('token?grant_type=refresh_token', { body: { refresh_token: session.refresh_token } });
-          user = await auth('user', { token: session.access_token });
+          session = await auth('token?grant_type=refresh_token', {
+            body: { refresh_token: session.refresh_token }
+          });
           storeSession();
+          return auth('user', { token: session.access_token });
         }
-      } catch {
-        forgetSession();
-        status.textContent = 'Entre novamente para abrir seu espaço.';
+      };
+      try {
+        user = remember && navigator.locks
+          ? await navigator.locks.request('mp-entry-session', validate)
+          : await validate();
+      } catch (error) {
+        if ([400, 401, 403].includes(error.status)) {
+          forgetSession();
+          status.textContent = 'Sua sessão expirou. Entre novamente.';
+        } else {
+          status.textContent = 'Não consegui verificar sua sessão agora. Você pode recarregar para tentar de novo.';
+        }
         showLogin();
+        return;
+      }
+      if (!user) {
+        showLogin();
+        status.textContent = '';
         return;
       }
       try { await enter(user); }
