@@ -1,7 +1,7 @@
 (() => {
   const endpoint = "https://aydwfcmxegcucmmspvib.supabase.co";
   const key = "sb_publishable_PxgmhZDEQLjUsLQT6Bw6Ww_hDGeYgJh";
-  const scripts = ["./app-core.js","./mobile-access.js","./help-controls.js","./help-position.js","./page-motion.js","./area-dialog.js","./evolution.js","./evolution-portal.js","community-social.js","./first-visit-guides.js","community.js?v=profile3","community-review.js?v=5"];
+  const scripts = ["./app-core.js","./mobile-access.js","./help-controls.js","./help-position.js","./page-motion.js","./area-dialog.js","./evolution.js","./evolution-portal.js","community-live.js","./first-visit-guides.js?v=19","community.js?v=profile3","community-review.js?v=5"];
   const sessionKey = 'mp:entry:session:v1';
   const gate = document.getElementById('entryGate');
   const form = document.getElementById('entryForm');
@@ -87,6 +87,39 @@
   async function enter(user) {
     if (typeof user?.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(user.id)) throw new Error('Sessão inválida.');
     const prefix = 'mp:account:' + user.id + ':';
+    window.mpCommunityRequest = async (path, options = {}) => {
+      const send = token => fetch(endpoint + path, {
+        ...options,
+        cache: 'no-store',
+        headers: { apikey: key, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(30000)
+      });
+      if (!session) throw new Error('Entre novamente para acessar a comunidade.');
+      const usedToken = session.access_token;
+      let response = await send(usedToken);
+      if (response.status === 401) {
+        const refresh = async () => {
+          if (remember) session = readSession(localStorage);
+          if (!session) throw new Error('Entre novamente para acessar a comunidade.');
+          if (session.access_token === usedToken) {
+            session = await auth('token?grant_type=refresh_token', { body: { refresh_token: session.refresh_token } });
+            storeSession();
+          }
+        };
+        if (remember && navigator.locks) await navigator.locks.request('mp-entry-session', refresh);
+        else await refresh();
+        response = await send(session.access_token);
+      }
+      const content = await response.text();
+      const data = content ? JSON.parse(content) : null;
+      if (!response.ok) {
+        const error = new Error(data?.error || 'Não foi possível acessar a comunidade agora.');
+        error.status = response.status;
+        throw error;
+      }
+      return data;
+    };
+    window.mpCommunityUserId = user.id;
     window.mpAccountName = typeof user.user_metadata?.display_name === 'string' ? user.user_metadata.display_name : '';
     window.mpAccountStorage = Object.freeze({
       getItem: key => localStorage.getItem(prefix + key),
