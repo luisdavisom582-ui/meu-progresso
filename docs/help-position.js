@@ -1,0 +1,1 @@
+document.querySelector(".top-right").append(document.querySelector(".urgent-widget"));

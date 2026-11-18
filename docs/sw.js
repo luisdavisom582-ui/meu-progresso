@@ -1,15 +1,17 @@
-const CACHE_NAME = "meu-progresso-demo-v15";
-const APP_SHELL = ["./", "./index.html", "./editorial.css", "./community-social.css", "./community-social.js", "./manifest.webmanifest", "./icon.svg", "./privacidade.html", "./termos.html", "./cookies.html", "./reembolsos.html"];
+const CACHE_PREFIX = 'meu-progresso-demo-';
+const CACHE_NAME = CACHE_PREFIX + 'v16';
+const APP_SHELL = ["./","./index.html","./editorial.css","./community-social.css","./community-social.js","./community.js?v=profile3","./community-review.js?v=5","./manifest.webmanifest","./icon.svg","./privacidade.html","./termos.html","./cookies.html","./reembolsos.html","./app-core.js","./mobile-access.js","./help-controls.js","./help-position.js","./page-motion.js","./area-dialog.js","./evolution.js","./evolution-portal.js","./first-visit-guides.js"];
+const SHELL_URLS = new Set(APP_SHELL.map(path => new URL(path, self.registration.scope).href));
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
+    await Promise.all(keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map((key) => caches.delete(key)));
     await self.clients.claim();
   })());
 });
@@ -17,26 +19,18 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) return;
+  if (event.request.mode === 'navigate') url.search = '';
+  if (!SHELL_URLS.has(url.href)) return;
   event.respondWith((async () => {
-    if (event.request.mode === "navigate") {
-      try {
-        const response = await fetch(event.request, { cache: "no-cache" });
-        if (response.ok) await (await caches.open(CACHE_NAME)).put("./index.html", response.clone());
-        return response;
-      } catch {
-        return (await caches.match("./index.html")) || Response.error();
-      }
-    }
     try {
-      const response = await fetch(event.request, { cache: "no-cache" });
-      if (response.ok) {
-        const cache = await caches.open(CACHE_NAME);
-        await cache.put(event.request, response.clone());
+      const response = await fetch(event.request, { cache: 'no-cache' });
+      if (response.ok && response.type === 'basic' && !response.redirected) {
+        try { await (await caches.open(CACHE_NAME)).put(url.href, response.clone()); }
+        catch { /* The online response is still usable. */ }
       }
       return response;
     } catch {
-      return (await caches.match(event.request)) || (await caches.match("./index.html")) || Response.error();
+      return (await (await caches.open(CACHE_NAME)).match(url.href)) || Response.error();
     }
   })());
 });
@@ -60,8 +54,8 @@ self.addEventListener("notificationclick", (event) => {
   event.waitUntil((async () => {
     const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     for (const client of windows) {
-      if ("focus" in client) return client.focus();
+      if (client.url.startsWith(self.registration.scope) && "focus" in client) return client.focus();
     }
-    return self.clients.openWindow(event.notification.data?.url || "./");
+    return self.clients.openWindow(self.registration.scope);
   })());
 });
