@@ -27,6 +27,17 @@
         <p id="liveError" class="social-error" role="status"></p>
         <div class="social-dialog-actions"><button type="button" class="select-small" id="liveCancel">Cancelar</button><button type="submit" class="add-btn">Publicar relato</button></div>
       </form>
+    </dialog>
+    <dialog class="social-dialog" id="liveDeleteDialog" aria-labelledby="liveDeleteTitle" aria-describedby="liveDeleteDescription">
+      <form method="dialog" class="live-delete-form">
+        <div class="live-delete-mark" aria-hidden="true">!</div>
+        <h2 id="liveDeleteTitle">Excluir relato?</h2>
+        <p id="liveDeleteDescription">Seu relato será removido do mural para todos. Essa ação não pode ser desfeita.</p>
+        <div class="social-dialog-actions">
+          <button class="select-small" value="cancel" autofocus>Cancelar</button>
+          <button class="live-delete-danger" value="delete">Excluir relato</button>
+        </div>
+      </form>
     </dialog>`;
   page.append(root);
   const get = id => document.getElementById(id);
@@ -62,7 +73,10 @@
     const body = document.createElement('p');
     body.className = 'social-body';
     body.textContent = post.body;
-    article.append(name, date, body);
+    const header = document.createElement('header');
+    header.className = 'live-post-meta';
+    header.append(name, date);
+    article.append(header, body);
     return article;
   }
   function empty(message) {
@@ -70,6 +84,14 @@
     node.className = 'panel social-empty';
     node.textContent = message;
     return node;
+  }
+  function confirmDelete() {
+    const confirmation = get('liveDeleteDialog');
+    confirmation.returnValue = '';
+    confirmation.showModal();
+    return new Promise(resolve => {
+      confirmation.addEventListener('close', () => resolve(confirmation.returnValue === 'delete'), { once: true });
+    });
   }
   async function loadPosts() {
     const rows = await request('/rest/v1/community_posts?select=id,body,display_name,is_anonymous,created_at&status=eq.published&order=created_at.desc&limit=50');
@@ -84,7 +106,7 @@
       const article = card(post);
       if (ownIds.has(post.id)) {
         article.append(button('Excluir meu relato', async () => {
-          if (!window.confirm('Excluir este relato? Ele sairá do mural para todos.')) return;
+          if (!await confirmDelete()) return;
           const resource = '/rest/v1/community_posts?id=eq.' + encodeURIComponent(post.id);
           await request(resource, { method: 'DELETE' });
           const remaining = await request(resource + '&select=id');

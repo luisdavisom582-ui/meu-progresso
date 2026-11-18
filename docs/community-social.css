@@ -85,3 +85,11 @@ body.dark-mode .social-error{color:#ffb7bc}
 @media(prefers-reduced-motion:reduce){.social-dialog[open]{animation:none}}
 
 .social-filters[hidden],.social-comments[hidden],#socialPhotoPreview[hidden]{display:none!important}
+
+.live-post-meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:12px}
+.live-post-meta p{margin:0;font-size:.8rem}
+.live-delete-form h2,.live-delete-form p{margin:0}
+.live-delete-form p{line-height:1.55}
+.live-delete-mark{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;background:#fbe9e7;color:#9d2f30;font-weight:800;font-size:1.2rem}
+.live-delete-form .live-delete-danger{min-height:44px;padding:9px 16px;border-radius:12px;border:1px solid #9d2f30;background:#9d2f30;color:#fff;font:inherit;font-weight:650;cursor:pointer}
+.live-delete-form .live-delete-danger:hover{background:#812527}
