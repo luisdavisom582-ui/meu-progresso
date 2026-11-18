@@ -42,9 +42,10 @@
     document.getElementById('nameField').hidden = !signup;
     document.getElementById('entryTerms').hidden = !signup;
     form.elements.displayName.required = signup;
-    document.getElementById('usernameField').hidden = !signup;
-    form.elements.username.disabled = !signup;
     form.elements.username.required = signup;
+    document.getElementById('usernameHint').textContent = signup
+      ? 'Use de 3 a 20 letras, números ou _.'
+      : 'Opcional. Preencha se sua conta ainda não tem um nome de usuário.';
     form.elements.terms.required = signup;
     form.elements.password.autocomplete = signup ? 'new-password' : 'current-password';
     form.elements.password.minLength = signup ? 8 : 0;
@@ -167,7 +168,7 @@
     const password = form.elements.password.value;
     const displayName = form.elements.displayName.value.trim();
     const username = form.elements.username.value.trim().toLowerCase();
-    if (signup && !/^[a-z0-9_]{3,20}$/.test(username)) {
+    if ((signup || username) && !/^[a-z0-9_]{3,20}$/.test(username)) {
       status.textContent = 'Escolha um nome de usuário com 3 a 20 letras, números ou _.';
       form.elements.username.focus();
       return;
@@ -193,7 +194,17 @@
       } else {
         remember = form.elements.remember.checked;
         session = await auth('token?grant_type=password', { body });
-        const user = await auth('user', { token: session.access_token });
+        let user = await auth('user', { token: session.access_token });
+        if (username && !user.user_metadata?.username) {
+          try {
+            user = await auth('user', {
+              method: 'PUT', token: session.access_token, body: { data: { username } }
+            });
+          } catch {
+            status.textContent = 'Não foi possível salvar o nome de usuário. Tente novamente ou deixe o campo vazio para entrar.';
+            return;
+          }
+        }
         if (!remember) clearSaved(localStorage);
         storeSession();
         await enter(user);
