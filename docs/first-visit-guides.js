@@ -42,7 +42,7 @@
   const key = 'mp_seen_guide_';
   let timer;
   function hasSeen(page) {
-    try { return seen.has(page) || localStorage.getItem(key + page) === '1'; }
+    try { return seen.has(page) || window.mpAccountStorage.getItem(key + page) === '1'; }
     catch { return seen.has(page); }
   }
   function showGuide(page) {
@@ -58,7 +58,7 @@
     }));
     dialog.showModal();
     seen.add(page);
-    try { localStorage.setItem(key + page, '1'); } catch {}
+    try { window.mpAccountStorage.setItem(key + page, '1'); } catch {}
   }
   function scheduleGuide(page) {
     clearTimeout(timer);

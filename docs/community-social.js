@@ -14,7 +14,7 @@
   ];
   function loadState() {
     try {
-      const value = JSON.parse(localStorage.getItem(storageKey));
+      const value = JSON.parse(window.mpAccountStorage.getItem(storageKey));
       if (value && Array.isArray(value.posts) && Array.isArray(value.supported) &&
           Array.isArray(value.saved) && Array.isArray(value.hidden) &&
           value.comments && typeof value.comments === 'object') return value;
@@ -40,7 +40,7 @@
     try {
       const userName = typeof currentUser !== 'undefined' && currentUser
         ? currentUser.user_metadata?.full_name || currentUser.user_metadata?.name : '';
-      const stored = JSON.parse(localStorage.getItem('mp_community_profile') || 'null');
+      const stored = JSON.parse(window.mpAccountStorage.getItem('mp_community_profile') || 'null');
       return String(userName || stored?.display_name || 'Você').slice(0, 60);
     } catch { return 'Você'; }
   }
@@ -61,7 +61,7 @@
   function commit(change) {
     const next = JSON.parse(JSON.stringify(state));
     change(next);
-    try { localStorage.setItem(storageKey, JSON.stringify(next)); }
+    try { window.mpAccountStorage.setItem(storageKey, JSON.stringify(next)); }
     catch {
       announce('Não foi possível salvar. Libere espaço no navegador e tente novamente.');
       return false;

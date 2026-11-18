@@ -61,7 +61,7 @@ async function loadCommunityProfile() {
   else {
     communityProfile = { display_name: 'Pessoa da comunidade', avatar_emoji: '🌿', theme: 'sage', username: null, bio: '', avatar_path: null, banner_path: null, is_public: false, show_in_posts: false, accent_color: '#527a5b' };
   }
-  localStorage.setItem('mp_community_profile', JSON.stringify(communityProfile));
+  window.mpAccountStorage.setItem('mp_community_profile', JSON.stringify(communityProfile));
   renderCommunityProfile();
   await renderOwnProfileMedia();
   const ownBadge = document.getElementById('ownProfileAdminBadge');
@@ -411,7 +411,7 @@ document.getElementById('communityProfileForm').addEventListener('submit', async
     if (!saved?.ok) throw new Error(saved?.error || 'Não consegui salvar o perfil.');
     communityProfile = next;
     removeCommunityAvatar = removeCommunityBanner = false;
-    localStorage.setItem('mp_community_profile', JSON.stringify(communityProfile));
+    window.mpAccountStorage.setItem('mp_community_profile', JSON.stringify(communityProfile));
     for (const path of oldPaths) if (![next.avatar_path, next.banner_path].includes(path)) await bucket.remove([path]);
     document.getElementById('communityAvatarFile').value = '';
     document.getElementById('communityBannerFile').value = '';
@@ -632,7 +632,7 @@ function resetCommunityProfileForSignedOut() {
   document.getElementById('communityBannerFile').value = '';
   communityCroppedFiles = { avatar: null, banner: null };
   removeCommunityAvatar = removeCommunityBanner = false;
-  localStorage.setItem('mp_community_profile', JSON.stringify(communityProfile));
+  window.mpAccountStorage.setItem('mp_community_profile', JSON.stringify(communityProfile));
   renderCommunityProfile();
   const ownBadge = document.getElementById('ownProfileAdminBadge');
   ownBadge.hidden = true; ownBadge.removeAttribute('data-rank');

@@ -1,0 +1,19 @@
+body.entry-locked{margin:0;min-height:100dvh;background:#edf2f3;color:#263e37}
+body.entry-locked > :not(#entryGate){display:none!important}
+#entryGate{display:grid;box-sizing:border-box;place-items:center;min-height:100dvh;padding:24px;font:16px/1.55 system-ui,sans-serif}
+#entryGate [hidden],#entryGate[hidden]{display:none!important}
+.entry-card{box-sizing:border-box;width:min(100%,440px);padding:clamp(20px,5vw,36px);border-radius:24px;background:white;border:1px solid #cfdbd5}
+.entry-brand{color:#37664d;font-weight:700;margin:0 0 12px}
+.entry-card h1{margin:0;font-size:clamp(24px,6vw,32px);line-height:1.15}
+#entryStatus:empty{display:none}
+#entryStatus{padding:10px 12px;border-radius:10px;background:#e8f1eb}
+#entryForm fieldset{padding:0;border:0;min-width:0}
+#entryForm label{display:block;margin:0 0 14px;font-weight:650}
+#entryForm input:not([type=checkbox]){box-sizing:border-box;display:block;width:100%;margin-top:5px;padding:11px;border:1px solid #a9beb2;border-radius:10px;font:inherit}
+#entryForm .entry-agreement{display:flex;gap:8px;font-size:14px;font-weight:400;align-items:baseline}
+.entry-card button{min-height:44px;border-radius:10px;border:1px solid #a9beb2;padding:8px 14px;font:inherit;cursor:pointer}
+.entry-submit{width:100%;background:#315f49;color:white}
+#entryToggle{margin-top:10px;width:100%;background:white;color:#315f49}
+.entry-card a{color:#315f49;text-decoration:underline}
+.entry-foot{font-size:13px;margin-bottom:0}
+#entryLogout{min-height:40px}
