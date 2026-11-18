@@ -1,7 +1,8 @@
 
 function renderEvolution(){
  const greeting=document.getElementById('evolutionGreeting');
- const displayName = window.mpAccountName || window.mpAccountUsername;
+ const profileUsername = readStore('mp_community_profile', null)?.username;
+ const displayName = profileUsername || window.mpAccountName || window.mpAccountUsername;
  greeting.textContent = displayName
    ? 'Boas-vindas, ' + displayName + '! Este é o seu espaço de evolução.'
    : 'Boas-vindas ao seu espaço de evolução!';
