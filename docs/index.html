@@ -48,7 +48,18 @@ body.dark-mode .urgent-panel{background:#1b2420;border-color:#46554a;color:var(-
 @media(max-width:700px){.cookie-notice{left:10px;bottom:80px;width:calc(100vw - 20px);padding:14px}.cookie-actions>*{flex:1}.legal-footer{padding-bottom:8px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style><link rel="stylesheet" href="editorial.css">
-<style>.demo-notice{padding:12px 20px;background:#e4ecdf;border-bottom:1px solid #c2d0bc;color:#30452f;text-align:center;font:13px/1.6 system-ui}.demo-notice strong{font-weight:700}#accountButton{display:none!important}</style><style> .live-identity{display:grid;gap:6px;border:1px solid #82938b;border-radius:12px;padding:8px 12px;margin:0}#authModal,#communityProfileForm [hidden]{display:none!important}body.entry-locked > :not(#entryGate),#entryGate[hidden]{display:none!important}</style><link rel="stylesheet" href="./entrada.css"><script src="./entrada.js?v=24" defer></script></head>
+<style>.demo-notice{padding:12px 20px;background:#e4ecdf;border-bottom:1px solid #c2d0bc;color:#30452f;text-align:center;font:13px/1.6 system-ui}.demo-notice strong{font-weight:700}#accountButton{display:none!important}</style><style> .live-identity{display:grid;gap:6px;border:1px solid #82938b;border-radius:12px;padding:8px 12px;margin:0}#authModal,#communityProfileForm [hidden]{display:none!important}body.entry-locked > :not(#entryGate),#entryGate[hidden]{display:none!important}</style><link rel="stylesheet" href="./entrada.css"><script src="./entrada.js?v=25" defer></script><style>
+.live-post-actions{display:flex;flex-wrap:wrap;gap:8px}
+.live-post-actions button[aria-pressed=true]{color:#215542;background:#dcefe4;border-color:#8ab8a0}
+.live-comments{margin-top:12px;padding-top:10px;border-top:1px solid #91a69a66}
+.live-comments summary{cursor:pointer;padding:8px 0;font-weight:650}
+.live-comment{padding:10px 0;border-bottom:1px solid #91a69a44}
+.live-comment p{margin:3px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.live-comment-form{display:grid;gap:6px;margin-top:10px}
+.live-comment-form textarea{display:block;width:100%;box-sizing:border-box}
+.live-comment-form p{margin:0;font-size:.85rem}
+.live-comment-form button{justify-self:start}
+</style></head>
 <body class="entry-locked">
 <main id="entryGate" aria-labelledby="entryTitle">
  <div class="entry-card">

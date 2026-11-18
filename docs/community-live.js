@@ -34,11 +34,11 @@
     <dialog class="social-dialog" id="liveDeleteDialog" aria-labelledby="liveDeleteTitle" aria-describedby="liveDeleteDescription">
       <form method="dialog" class="live-delete-form">
         <div class="live-delete-mark" aria-hidden="true">!</div>
-        <h2 id="liveDeleteTitle">Excluir relato?</h2>
+        <h2 id="liveDeleteTitle">Confirmar ação</h2>
         <p id="liveDeleteDescription">Seu relato será removido do mural para todos. Essa ação não pode ser desfeita.</p>
         <div class="social-dialog-actions">
           <button class="select-small" value="cancel" autofocus>Cancelar</button>
-          <button class="live-delete-danger" value="delete">Excluir relato</button>
+          <button id="liveConfirmAction" class="live-delete-danger" value="confirm">Confirmar</button>
         </div>
       </form>
     </dialog>`;
@@ -88,13 +88,94 @@
     node.textContent = message;
     return node;
   }
-  function confirmDelete() {
-    const confirmation = get('liveDeleteDialog');
-    confirmation.returnValue = '';
-    confirmation.showModal();
+  function confirmActionInMural(title, description, label) {
+    const dialog = get('liveDeleteDialog');
+    get('liveDeleteTitle').textContent = title;
+    get('liveDeleteDescription').textContent = description;
+    get('liveConfirmAction').textContent = label;
+    dialog.returnValue = '';
+    dialog.showModal();
     return new Promise(resolve => {
-      confirmation.addEventListener('close', () => resolve(confirmation.returnValue === 'delete'), { once: true });
+      dialog.addEventListener('close', () => resolve(dialog.returnValue === 'confirm'), { once: true });
     });
+  }
+  function rpc(name, payload) {
+    return request('/rest/v1/rpc/' + name, { method: 'POST', body: JSON.stringify(payload) });
+  }
+  function addInteractions(article, post, initialSupport) {
+    const actions = document.createElement('div');
+    actions.className = 'live-post-actions';
+    let support = initialSupport;
+    const supportButton = button('Apoiar', async () => {
+      const reacted = await rpc('toggle_community_reaction', { p_post_id: post.id, p_reaction: 'with_you' });
+      const delta = Number(reacted) - Number(support.reacted);
+      support = { reacted, reaction_count: Math.max(0, Number(support.reaction_count) + delta) };
+      renderSupport();
+      try {
+        const counts = await rpc('community_reaction_counts', { p_post_ids: [post.id] });
+        support = counts.find(row => row.reaction === 'with_you') || support;
+        renderSupport();
+      } catch { /* The confirmed reaction stays visible. */ }
+    });
+    function renderSupport() {
+      const label = support.reacted ? '♥ Apoiado' : '♡ Apoiar';
+      supportButton.textContent = label + (Number(support.reaction_count) ? ' · ' + support.reaction_count : '');
+      supportButton.setAttribute('aria-pressed', String(support.reacted));
+    }
+    renderSupport();
+    const comments = document.createElement('details');
+    comments.className = 'live-comments';
+    comments.innerHTML = '<summary>Comentar e ver comentários</summary><div data-comments></div><form class="live-comment-form"><label>Seu comentário<textarea name="body" maxlength="400" rows="2" required></textarea></label><label><input name="anonymous" type="checkbox" checked> Comentar como anônimo</label><p>O texto passa por análise automática da OpenAI antes de aparecer.</p><button class="select-small" type="submit">Publicar comentário</button><p role="status"></p></form>';
+    const list = comments.querySelector('[data-comments]');
+    const form = comments.querySelector('form');
+    const feedback = form.querySelector('[role=status]');
+    async function loadComments() {
+      const rows = await request('/rest/v1/community_comments?select=body,display_name,created_at&post_id=eq.' + encodeURIComponent(post.id) + '&order=created_at.desc&limit=50');
+      list.replaceChildren();
+      if (!rows.length) {
+        const e = document.createElement('p');
+        e.textContent = 'Ainda não há comentários.';
+        list.append(e);
+      }
+      for (const row of rows) {
+        const item = document.createElement('div');
+        item.className = 'live-comment';
+        const name = document.createElement('strong');
+        name.textContent = row.display_name;
+        const body = document.createElement('p');
+        body.textContent = row.body;
+        item.append(name, body);
+        list.append(item);
+      }
+    }
+    comments.addEventListener('toggle', () => {
+      if (comments.open) void loadComments().catch(error => { feedback.textContent = error.message; });
+    });
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const submit = event.submitter;
+      if (submit.disabled) return;
+      const body = form.elements.body.value.trim();
+      if (!body) { feedback.textContent = 'Escreva um comentário.'; return; }
+      submit.disabled = true;
+      feedback.textContent = 'Publicando…';
+      try {
+        const result = await request('/functions/v1/community-submit', {
+          method: 'POST',
+          body: JSON.stringify({ kind: 'comment', post_id: post.id, body,
+            is_anonymous: form.elements.anonymous.checked, display_name: currentDisplayName() })
+        });
+        if (!result?.ok) throw new Error(result?.error || 'Não consegui publicar o comentário.');
+        form.reset();
+        feedback.textContent = 'Comentário publicado.';
+        try { await loadComments(); }
+        catch { feedback.textContent = 'Comentário publicado. Reabra a seção para atualizar.'; }
+      } catch (error) { feedback.textContent = error.message; }
+      finally { submit.disabled = false; }
+    });
+    actions.append(supportButton);
+    article.append(actions, comments);
+    return actions;
   }
   async function loadPosts() {
     const rows = await request('/rest/v1/community_posts?select=id,body,display_name,is_anonymous,created_at&status=eq.published&order=created_at.desc&limit=50');
@@ -105,11 +186,19 @@
         for (const row of ids || []) ownIds.add(typeof row === 'string' ? row : row.my_community_post_ids);
       } catch { status.textContent = 'Não consegui verificar quais relatos são seus.'; }
     }
+    const supports = new Map();
+    if (rows.length) {
+      try {
+        const counts = await rpc('community_reaction_counts', { p_post_ids: rows.map(post => post.id) });
+        for (const row of counts) if (row.reaction === 'with_you') supports.set(row.post_id, row);
+      } catch { /* A reaction can still be attempted independently. */ }
+    }
     posts.replaceChildren(...(rows.length ? rows.map(post => {
       const article = card(post);
+      const actions = addInteractions(article, post, supports.get(post.id) || { reacted: false, reaction_count: 0 });
       if (ownIds.has(post.id)) {
-        article.append(button('Excluir meu relato', async () => {
-          if (!await confirmDelete()) return;
+        actions.append(button('Excluir meu relato', async () => {
+          if (!await confirmActionInMural('Excluir relato?', 'Seu relato será removido do mural para todos. Essa ação não pode ser desfeita.', 'Excluir relato')) return;
           const resource = '/rest/v1/community_posts?id=eq.' + encodeURIComponent(post.id);
           await request(resource, { method: 'DELETE' });
           const remaining = await request(resource + '&select=id');
@@ -118,8 +207,8 @@
           if (!posts.childElementCount) posts.append(empty('Ainda não há relatos publicados. Que tal escrever o primeiro?'));
           status.textContent = 'Seu relato foi excluído do mural.';
         }));
-      } else article.append(button('Denunciar', async () => {
-        if (!window.confirm('Enviar este relato para revisão da equipe?')) return;
+      } else actions.append(button('Denunciar', async () => {
+        if (!await confirmActionInMural('Denunciar relato?', 'A equipe vai revisar o conteúdo deste relato.', 'Enviar denúncia')) return;
         await request('/rest/v1/community_reports', {
           method: 'POST', body: JSON.stringify({post_id:post.id,reporter_id:window.mpCommunityUserId,reason:'Conteúdo inadequado'})
         });
@@ -157,7 +246,7 @@
       article.append(reason);
       if (report.post && report.post.status === 'published') {
         article.append(button('Remover relato', async () => {
-          if (!window.confirm('Remover este relato do mural compartilhado?')) return;
+          if (!await confirmActionInMural('Remover relato?', 'O relato deixará de aparecer no mural para todos.', 'Remover do mural')) return;
           await review('remove_reported_post', { post_id: report.post_id });
           await loadPosts();
           await loadQueue();
