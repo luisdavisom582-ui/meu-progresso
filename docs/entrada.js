@@ -1,7 +1,7 @@
 (() => {
   const endpoint = "https://aydwfcmxegcucmmspvib.supabase.co";
   const key = "sb_publishable_PxgmhZDEQLjUsLQT6Bw6Ww_hDGeYgJh";
-  const scripts = ["./app-core.js","./mobile-access.js","./help-controls.js","./help-position.js","./page-motion.js","./area-dialog.js","./evolution.js","./evolution-portal.js","community-live.js?v=22","./first-visit-guides.js?v=20","community.js?v=profile4","community-review.js?v=5"];
+  const scripts = ["./app-core.js","./mobile-access.js","./help-controls.js","./help-position.js","./page-motion.js","./area-dialog.js","./evolution.js","./evolution-portal.js","community-live.js?v=24","./first-visit-guides.js?v=20","community.js?v=profile4","community-review.js?v=5"];
   const sessionKey = 'mp:entry:session:v1';
   const gate = document.getElementById('entryGate');
   const form = document.getElementById('entryForm');

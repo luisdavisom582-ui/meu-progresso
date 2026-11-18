@@ -22,7 +22,10 @@
         <h2 id="liveTitle">Escreva seu relato</h2>
         <label>Relato<textarea name="body" rows="5" maxlength="1200" required></textarea></label>
         <label>Tema<select name="topic"><option value="dia-a-dia">Meu dia</option><option value="pequena-vitoria">Pequena vitória</option><option value="rotina">Rotina</option><option value="dia-dificil">Dia difícil</option><option value="quero-desabafar">Desabafo</option></select></label>
-        <label><span><input type="checkbox" name="anonymous" checked> Publicar anonimamente</span></label>
+        <fieldset class="live-identity"><legend>Como quer aparecer no mural?</legend>
+          <label><span><input type="radio" name="identity" value="named" required> Com meu nome <small id="liveNamePreview"></small></span></label>
+          <label><span><input type="radio" name="identity" value="anonymous"> Anônimo</span></label>
+        </fieldset>
         <label><span><input type="checkbox" name="consent" required> Concordo com o envio do texto à OpenAI para análise automática e com a publicação no mural se o texto for aceito.</span></label>
         <p id="liveError" class="social-error" role="status"></p>
         <div class="social-dialog-actions"><button type="button" class="select-small" id="liveCancel">Cancelar</button><button type="submit" class="add-btn">Publicar relato</button></div>
@@ -167,7 +170,19 @@
       queue.append(article);
     }
   }
+  function currentDisplayName() {
+    let nickname = '';
+    try { nickname = JSON.parse(window.mpAccountStorage.getItem('mp_community_profile') || 'null')?.display_name || ''; } catch {}
+    const names = [nickname, window.mpAccountName];
+    for (const value of names) {
+      if (typeof value !== 'string') continue;
+      const name = value.trim().slice(0, 32);
+      if (name.length >= 2 && name !== 'Pessoa da comunidade') return name;
+    }
+    return 'Pessoa da comunidade';
+  }
   get('liveCompose').addEventListener('click', () => {
+    get('liveNamePreview').textContent = '· ' + currentDisplayName();
     get('liveError').textContent = '';
     dialog.showModal();
   });
@@ -182,7 +197,12 @@
     const submit = event.submitter;
     const error = get('liveError');
     const body = form.elements.body.value.trim();
-    const displayName = (window.mpAccountName || '').trim().slice(0, 32);
+    const displayName = currentDisplayName();
+    const identity = form.elements.identity.value;
+    if (identity !== 'named' && identity !== 'anonymous') {
+      error.textContent = 'Escolha como quer aparecer no mural.';
+      return;
+    }
     if (!body) { error.textContent = 'Escreva um relato antes de enviar.'; return; }
     submit.disabled = true;
     error.textContent = 'Publicando…';
@@ -190,8 +210,8 @@
       const result = await request('/functions/v1/community-submit', {
         method: 'POST',
         body: JSON.stringify({
-          body, topic: form.elements.topic.value, is_anonymous: form.elements.anonymous.checked,
-          display_name: displayName.length >= 2 ? displayName : 'Pessoa da comunidade',
+          body, topic: form.elements.topic.value, is_anonymous: identity === 'anonymous',
+          display_name: displayName,
           theme: 'sage', avatar_emoji: '🌿'
         })
       });
