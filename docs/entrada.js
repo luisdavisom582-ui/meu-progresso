@@ -14,11 +14,11 @@
   let remember = false;
   let creating = false;
 
-  async function auth(path, { body, token, keepalive = false } = {}) {
+  async function auth(path, { body, token, keepalive = false, method } = {}) {
     const headers = { apikey: key, 'Content-Type': 'application/json' };
     if (token) headers.Authorization = 'Bearer ' + token;
     const response = await fetch(endpoint + '/auth/v1/' + path, {
-      method: body || keepalive ? 'POST' : 'GET', headers,
+      method: method || (body || keepalive ? 'POST' : 'GET'), headers,
       body: body ? JSON.stringify(body) : undefined, keepalive, cache: 'no-store',
       signal: keepalive ? undefined : AbortSignal.timeout(12000)
     });
@@ -35,6 +35,7 @@
 
   function setMode(signup) {
     creating = signup;
+    document.getElementById('entryForgot').hidden = signup;
     document.getElementById('entryRemember').hidden = signup;
     document.getElementById('entryTitle').textContent = signup ? 'Crie sua conta' : 'Entre na sua conta';
     document.getElementById('entryIntro').textContent = signup ? 'Seu nome e e-mail ficam vinculados à conta no Supabase. Seu diário e suas metas ficam neste navegador.' : 'Entre para acessar seu espaço.';
@@ -145,6 +146,7 @@
     fields.disabled = false;
     form.hidden = false;
     toggle.hidden = false;
+    forgot.hidden = creating;
   }
   toggle.addEventListener('click', () => {
     setMode(!creating);
@@ -205,11 +207,98 @@
     location.replace(home);
   });
 
+  const recoveryForm = document.getElementById('entryRecovery');
+  const resetForm = document.getElementById('entryReset');
+  const forgot = document.getElementById('entryForgot');
+  let recoveryToken = '';
+  function recoveryScreen(reset) {
+    form.hidden = true;
+    toggle.hidden = true;
+    forgot.hidden = true;
+    recoveryForm.hidden = reset;
+    resetForm.hidden = !reset;
+    document.getElementById('entryTitle').textContent = reset ? 'Crie uma nova senha' : 'Recupere sua senha';
+    document.getElementById('entryIntro').textContent = reset ? 'Use pelo menos 8 caracteres.' : 'Informe o e-mail da sua conta.';
+  }
+  function backToLogin(message = '') {
+    recoveryToken = '';
+    recoveryForm.hidden = resetForm.hidden = true;
+    resetForm.reset();
+    setMode(false);
+    showLogin();
+    status.textContent = message;
+  }
+  forgot.addEventListener('click', () => {
+    recoveryScreen(false);
+    status.textContent = '';
+    recoveryForm.elements.email.value = form.elements.email.value;
+    recoveryForm.elements.email.focus();
+  });
+  for (const button of gate.querySelectorAll('[data-recovery-back]')) {
+    button.addEventListener('click', () => backToLogin());
+  }
+  recoveryForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const submit = event.submitter;
+    if (submit.disabled) return;
+    submit.disabled = true;
+    status.textContent = 'Solicitando o link…';
+    try {
+      await auth('recover?redirect_to=' + encodeURIComponent(home), {
+        body: { email: recoveryForm.elements.email.value.trim() }
+      });
+      status.textContent = 'Se houver uma conta com esse e-mail, confira sua caixa de entrada e o spam.';
+    } catch (error) {
+      status.textContent = error.status === 429
+        ? 'O limite de envio de e-mails foi atingido. Aguarde antes de pedir outro link.'
+        : 'Não consegui solicitar o link agora. Tente novamente mais tarde.';
+    } finally { submit.disabled = false; }
+  });
+  resetForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    const submit = event.submitter;
+    if (submit.disabled || !recoveryToken) return;
+    const password = resetForm.elements.password.value;
+    if (password !== resetForm.elements.confirmPassword.value) {
+      status.textContent = 'As duas senhas precisam ser iguais.';
+      return;
+    }
+    submit.disabled = true;
+    try {
+      await auth('user', { method: 'PUT', token: recoveryToken, body: { password } });
+      backToLogin('Senha atualizada. Entre com a nova senha.');
+    } catch (error) {
+      if (error.status === 401 || error.status === 403) {
+        backToLogin('O link expirou. Peça outro em “Esqueci minha senha”.');
+      } else {
+        status.textContent = error.code === 'weak_password' ? 'Escolha uma senha mais forte.'
+          : error.code === 'same_password' ? 'Escolha uma senha diferente da anterior.'
+          : 'Não consegui atualizar a senha. Tente novamente.';
+      }
+    } finally { submit.disabled = false; }
+  });
+
   async function start() {
     const callback = new URLSearchParams(location.hash.slice(1));
     const fromEmail = callback.has('access_token') || callback.has('error') ||
       new URL(location.href).searchParams.has('code');
     if (fromEmail) history.replaceState(null, '', home);
+    if (callback.get('type') === 'recovery' && callback.get('access_token')) {
+      recoveryToken = callback.get('access_token');
+      try {
+        await auth('user', { token: recoveryToken });
+        recoveryScreen(true);
+        status.textContent = '';
+        resetForm.elements.password.focus();
+      } catch {
+        backToLogin('Não consegui validar o link. Peça outro em “Esqueci minha senha”.');
+      }
+      return;
+    }
+    if (callback.has('error')) {
+      backToLogin('O link do e-mail é inválido ou expirou. Solicite um novo.');
+      return;
+    }
     const persistent = readSession(localStorage);
     remember = Boolean(persistent);
     session = persistent || readSession(sessionStorage);

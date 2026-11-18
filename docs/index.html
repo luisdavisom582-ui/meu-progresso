@@ -48,7 +48,7 @@ body.dark-mode .urgent-panel{background:#1b2420;border-color:#46554a;color:var(-
 @media(max-width:700px){.cookie-notice{left:10px;bottom:80px;width:calc(100vw - 20px);padding:14px}.cookie-actions>*{flex:1}.legal-footer{padding-bottom:8px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style><link rel="stylesheet" href="editorial.css">
-<style>.demo-notice{padding:12px 20px;background:#e4ecdf;border-bottom:1px solid #c2d0bc;color:#30452f;text-align:center;font:13px/1.6 system-ui}.demo-notice strong{font-weight:700}#accountButton{display:none!important}</style><style> .live-identity{display:grid;gap:6px;border:1px solid #82938b;border-radius:12px;padding:8px 12px;margin:0}#authModal,#communityProfileForm [hidden]{display:none!important}body.entry-locked > :not(#entryGate),#entryGate[hidden]{display:none!important}</style><link rel="stylesheet" href="./entrada.css"><script src="./entrada.js?v=25" defer></script><style>
+<style>.demo-notice{padding:12px 20px;background:#e4ecdf;border-bottom:1px solid #c2d0bc;color:#30452f;text-align:center;font:13px/1.6 system-ui}.demo-notice strong{font-weight:700}#accountButton{display:none!important}</style><style> .live-identity{display:grid;gap:6px;border:1px solid #82938b;border-radius:12px;padding:8px 12px;margin:0}#authModal,#communityProfileForm [hidden]{display:none!important}body.entry-locked > :not(#entryGate),#entryGate[hidden]{display:none!important}</style><link rel="stylesheet" href="./entrada.css"><script src="./entrada.js?v=26" defer></script><style>
 .live-post-actions{display:flex;flex-wrap:wrap;gap:8px}
 .live-post-actions button[aria-pressed=true]{color:#215542;background:#dcefe4;border-color:#8ab8a0}
 .live-comments{margin-top:12px;padding-top:10px;border-top:1px solid #91a69a66}
@@ -77,6 +77,19 @@ body.dark-mode .urgent-panel{background:#1b2420;border-color:#46554a;color:var(-
     <button class="entry-submit" type="submit">Entrar</button>
    </fieldset>
   </form>
+  <button id="entryForgot" type="button" hidden>Esqueci minha senha</button>
+  <form id="entryRecovery" hidden>
+    <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
+    <button class="entry-submit" type="submit">Enviar link de recuperação</button>
+    <button type="button" data-recovery-back>Voltar para entrar</button>
+  </form>
+  <form id="entryReset" hidden>
+    <label>Nova senha<input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></label>
+    <label>Confirme a nova senha<input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></label>
+    <button class="entry-submit" type="submit">Salvar nova senha</button>
+    <button type="button" data-recovery-back>Voltar para entrar</button>
+  </form>
+  <style>#entryForgot{width:100%;margin-top:10px;color:#315f49;background:white}#entryRecovery label,#entryReset label{display:block;margin-bottom:14px}#entryRecovery input,#entryReset input{display:block;box-sizing:border-box;width:100%;padding:11px;margin-top:5px;border:1px solid #a9beb2;border-radius:10px;font:inherit}#entryGate [data-recovery-back]{margin-top:10px;width:100%}</style>
   <button id="entryToggle" type="button" hidden>Criar uma conta</button>
   <p class="entry-foot"><a href="./privacidade.html">Privacidade</a> · <a href="./termos.html">Termos de uso</a></p>
   <noscript>Ative o JavaScript para acessar sua conta.</noscript>
