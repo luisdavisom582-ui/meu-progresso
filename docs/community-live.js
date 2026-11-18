@@ -73,9 +73,27 @@
   }
   async function loadPosts() {
     const rows = await request('/rest/v1/community_posts?select=id,body,display_name,is_anonymous,created_at&status=eq.published&order=created_at.desc&limit=50');
+    const ownIds = new Set();
+    if (rows.length) {
+      try {
+        const ids = await request('/rest/v1/rpc/my_community_post_ids', { method: 'POST', body: '{}' });
+        for (const row of ids || []) ownIds.add(typeof row === 'string' ? row : row.my_community_post_ids);
+      } catch { status.textContent = 'Não consegui verificar quais relatos são seus.'; }
+    }
     posts.replaceChildren(...(rows.length ? rows.map(post => {
       const article = card(post);
-      article.append(button('Denunciar', async () => {
+      if (ownIds.has(post.id)) {
+        article.append(button('Excluir meu relato', async () => {
+          if (!window.confirm('Excluir este relato? Ele sairá do mural para todos.')) return;
+          const resource = '/rest/v1/community_posts?id=eq.' + encodeURIComponent(post.id);
+          await request(resource, { method: 'DELETE' });
+          const remaining = await request(resource + '&select=id');
+          if (remaining.length) throw new Error('Não foi possível excluir o relato.');
+          article.remove();
+          if (!posts.childElementCount) posts.append(empty('Ainda não há relatos publicados. Que tal escrever o primeiro?'));
+          status.textContent = 'Seu relato foi excluído do mural.';
+        }));
+      } else article.append(button('Denunciar', async () => {
         if (!window.confirm('Enviar este relato para revisão da equipe?')) return;
         await request('/rest/v1/community_reports', {
           method: 'POST', body: JSON.stringify({post_id:post.id,reporter_id:window.mpCommunityUserId,reason:'Conteúdo inadequado'})
