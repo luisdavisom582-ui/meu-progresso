@@ -42,6 +42,9 @@
     document.getElementById('nameField').hidden = !signup;
     document.getElementById('entryTerms').hidden = !signup;
     form.elements.displayName.required = signup;
+    document.getElementById('usernameField').hidden = !signup;
+    form.elements.username.disabled = !signup;
+    form.elements.username.required = signup;
     form.elements.terms.required = signup;
     form.elements.password.autocomplete = signup ? 'new-password' : 'current-password';
     form.elements.password.minLength = signup ? 8 : 0;
@@ -121,7 +124,10 @@
       return data;
     };
     window.mpCommunityUserId = user.id;
-    window.mpAccountName = typeof user.user_metadata?.display_name === 'string' ? user.user_metadata.display_name : '';
+    const metadata = user.user_metadata || {};
+    window.mpAccountName = [metadata.display_name, metadata.full_name, metadata.name]
+      .find(name => typeof name === 'string' && name.trim())?.trim() || '';
+    window.mpAccountUsername = /^[a-z0-9_]{3,20}$/.test(metadata.username || '') ? metadata.username : '';
     window.mpAccountStorage = Object.freeze({
       getItem: key => localStorage.getItem(prefix + key),
       setItem: (key, value) => localStorage.setItem(prefix + key, value),
@@ -160,6 +166,12 @@
     const email = form.elements.email.value.trim();
     const password = form.elements.password.value;
     const displayName = form.elements.displayName.value.trim();
+    const username = form.elements.username.value.trim().toLowerCase();
+    if (signup && !/^[a-z0-9_]{3,20}$/.test(username)) {
+      status.textContent = 'Escolha um nome de usuário com 3 a 20 letras, números ou _.';
+      form.elements.username.focus();
+      return;
+    }
     if (signup && !displayName) {
       status.textContent = 'Digite como quer ser chamado.';
       return;
@@ -172,10 +184,11 @@
       const body = { email, password };
       if (signup) {
         await auth('signup?redirect_to=' + encodeURIComponent(home), {
-          body: { ...body, data: { display_name: displayName } }
+          body: { ...body, data: { display_name: displayName, username } }
         });
         setMode(false);
         form.elements.terms.checked = false;
+        form.elements.username.value = '';
         status.textContent = 'Confira seu e-mail para confirmar o cadastro. Depois, volte aqui e entre com sua senha.';
       } else {
         remember = form.elements.remember.checked;

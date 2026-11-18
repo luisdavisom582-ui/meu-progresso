@@ -1,9 +1,10 @@
 
 function renderEvolution(){
  const greeting=document.getElementById('evolutionGreeting');
- const accountName=(typeof currentUser!=='undefined'&&currentUser)?(currentUser.user_metadata?.full_name||currentUser.user_metadata?.name||currentUser.email?.split('@')[0]):'';
- const displayName=(accountName||'Luiz').trim().split(/[ ._@-]/)[0];
- greeting.textContent='Bem-vindo, '+displayName+'. Este é o seu espaço de evolução.';
+ const displayName = window.mpAccountName || window.mpAccountUsername;
+ greeting.textContent = displayName
+   ? 'Boas-vindas, ' + displayName + '! Este é o seu espaço de evolução.'
+   : 'Boas-vindas ao seu espaço de evolução!';
  const box=document.getElementById('evolutionContent'),days=Number(document.getElementById('evolutionPeriod').value),now=new Date(),today=iso(now);
  const weeks=new Set(entries.map(e=>{const d=new Date(e.date+'T12:00:00'),w=new Date(d);w.setDate(d.getDate()-((d.getDay()+6)%7));return iso(w)}));
  const first=entries.map(e=>e.date).sort()[0],enough=first&&(Date.now()-new Date(first+'T12:00:00').getTime()>=13*86400000)&&weeks.size>=2;

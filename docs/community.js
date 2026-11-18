@@ -37,7 +37,7 @@ function renderCommunityProfile() {
   document.getElementById('communityAlias').value = communityProfile.display_name || 'Pessoa da comunidade';
   document.getElementById('communityEmoji').value = communityProfile.avatar_emoji || '🌿';
   document.getElementById('communityTheme').value = communityProfile.theme || 'sage';
-  document.getElementById('communityUsername').value = communityProfile.username || '';
+  document.getElementById('communityUsername').value = communityProfile.username || window.mpAccountUsername || '';
   document.getElementById('communityBio').value = communityProfile.bio || '';
   document.getElementById('communityAccent').value = communityProfile.accent_color || '#527a5b';
   document.querySelector('.profile-settings-page')?.style.setProperty('--profile-accent', communityProfile.accent_color || '#527a5b');
