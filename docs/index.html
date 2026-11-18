@@ -109,7 +109,7 @@ const confirmModal=document.getElementById('confirmModal');let confirmResolver=n
 const modal=document.getElementById('modal'),entryForm=document.getElementById('entryForm');let entryModalOpener=null;function closeEntryModal(){modal.classList.remove('open');const target=entryModalOpener?.isConnected?entryModalOpener:document.getElementById('openModal');target.focus()}function openEntryForm(entry=null){entryModalOpener=document.activeElement;if(!areas.length){toast('Adicione uma área primeiro.');return}entryForm.reset();fillAreaSelect();document.getElementById('entryId').value=entry?entry.id:'';document.getElementById('formTitle').textContent=entry?'Editar registro':'Novo registro';document.getElementById('entryArea').value=entry?entry.areaId:areas[0].id;document.getElementById('entryTitle').value=entry?entry.title:'';document.getElementById('entryNote').value=entry?(entry.note||''):'';document.getElementById('entryValue').value=entry?entry.value:1;document.getElementById('entryDate').value=entry?entry.date:iso(new Date());modal.classList.add('open');document.getElementById('entryTitle').focus()}document.getElementById('openModal').onclick=()=>openEntryForm();document.getElementById('aboutAddEntry').onclick=()=>openEntryForm();document.getElementById('closeModal').onclick=closeEntryModal;modal.addEventListener('click',e=>{if(e.target===modal)closeEntryModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(confirmModal.classList.contains('open'))closeConfirm(false);else if(authModal.classList.contains('open')){authModal.classList.remove('open');accountButton.focus()}else if(modal.classList.contains('open'))closeEntryModal()}});entryForm.addEventListener('submit',async e=>{e.preventDefault();const id=document.getElementById('entryId').value,record={id:id||crypto.randomUUID(),areaId:document.getElementById('entryArea').value,title:document.getElementById('entryTitle').value.trim(),note:document.getElementById('entryNote').value.trim(),value:Number(document.getElementById('entryValue').value),date:document.getElementById('entryDate').value};if(!record.title||!record.date||record.value<1||record.value>5){toast('Confira a descrição, a data e os pontos (1 a 5).');return}if(id){entries=entries.map(item=>String(item.id)===id?record:item)}else{entries.push(record)}const persisted=save();render();closeEntryModal();if(currentUser){const cloudSaved=await saveEntryCloud(record);toast(cloudSaved?(id?'Registro atualizado na sua conta.':'Registro salvo na sua conta!'):'Não consegui sincronizar com sua conta; confira a conexão.')}else{toast(persisted?'Registro salvo neste navegador. Entre para guardar na nuvem.':'O navegador não permitiu salvar os dados.')}});document.getElementById('entries').addEventListener('click',async e=>{const edit=e.target.closest('[data-edit]'),remove=e.target.closest('[data-delete]');if(edit){const record=entries.find(item=>String(item.id)===edit.dataset.edit);if(record)openEntryForm(record)}if(remove){const id=remove.dataset.delete,record=entries.find(item=>String(item.id)===id);if(!record||!await confirmAction(`Tem certeza que deseja excluir o registro “${record.title}”?`))return;if(currentUser&&!await deleteEntryCloud(id)){toast('Não consegui excluir o registro da nuvem. Ele continua salvo.');return}entries=entries.filter(item=>String(item.id)!==id);save();render();toast('Registro excluído.')}});
 function combineDayPages(){const diary=document.querySelector('.journal-page'),care=document.querySelector('.care-page');if(!diary||!care)return;const merged=document.createElement('section');merged.className='day-page';merged.dataset.section='day';merged.hidden=true;const careHero=care.children[0],careGrid=care.children[1],diaryHero=diary.children[0],diaryHistory=diary.children[1],diaryPrivacy=diary.children[2],cards=[...careGrid.children],dailyGrid=document.createElement('div'),laterGrid=document.createElement('div');dailyGrid.className='care-grid';laterGrid.className='care-grid';careHero.querySelector('h2').textContent='Seu dia, no seu ritmo.';careHero.querySelector('p').textContent='Um espaço para perceber como você está, escolher um passo possível e escrever sem cobrança.';diaryHero.querySelector('h2').textContent='Escreva sobre o seu dia';dailyGrid.append(cards[0],cards[1]);laterGrid.append(cards[3],cards[2],cards[4],cards[5]);merged.append(careHero,dailyGrid,diaryHero,diaryHistory,laterGrid,diaryPrivacy);diary.replaceWith(merged);care.remove()}
 combineDayPages();
-function showPage(page){const leavingEvolution=document.body.classList.contains("evolution-world")&&page!=="evolution";document.body.classList.toggle("evolution-world",page==="evolution");if(page==="evolution"||leavingEvolution)openEvolutionPortal(leavingEvolution);const more=document.getElementById('mobileMore');if(more)more.open=false;activePage=page;document.querySelectorAll('[data-section]').forEach(el=>{el.hidden=!el.dataset.section.split(' ').includes(page)});document.querySelectorAll('[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));document.querySelectorAll('.mobile-nav button').forEach(el=>el.classList.toggle('active',el.dataset.page===page));let titles={dashboard:['Hoje conta, do seu jeito.','Registre o que fez sentido para você e acompanhe seus passos sem comparar sua história com a de ninguém.'],progress:['Meu progresso','Veja suas áreas, metas e registros em um só lugar.'],evolution:['Sua evolução','Compare seus registros e acompanhe suas mudanças.'],reports:['Relatórios','Uma visão clara da sua consistência e evolução.'],about:['Como funciona','Entenda o objetivo do site e como acompanhar seu progresso.'],tips:['Dicas do dia','Ideias simples para apoiar sua rotina.'],support:['Saúde mental','Informações de apoio e caminhos para buscar ajuda.'],day:['Meu dia','Check-in, diário e pequenas metas — tudo no mesmo lugar.'],community:['Comunidade','Compartilhe sua experiência com cuidado e leia outros relatos.'],staff:['Central da equipe','Acesso restrito a administradores, analistas e suporte.'],myProfile:['Meu perfil','Personalize sua página e escolha o que compartilhar.'],profile:['Perfil da comunidade','Uma página personalizada para compartilhar com cuidado.']};if(!['about','tips','support','day'].includes(page)){document.getElementById('pageTitle').textContent=titles[page][0];document.getElementById('pageSubtitle').textContent=titles[page][1]}renderEntries();if(page==='evolution')renderEvolution();if(page==='day'){renderJournal();renderCare()}if(page==='myProfile'){renderCommunityProfile();if(typeof currentUser!=='undefined'&&currentUser)void loadCommunityProfile()}if(page==='community'){void loadCommunityFeed()}if(page==='staff'&&typeof loadStaffConsole==='function')void loadStaffConsole();window.scrollTo({top:0,behavior:'smooth'})}
+function showPage(page){const leavingEvolution=document.body.classList.contains("evolution-world")&&page!=="evolution";document.body.classList.toggle("evolution-world",page==="evolution");if(page==="evolution"||leavingEvolution)openEvolutionPortal(leavingEvolution);const more=document.getElementById('mobileMore');if(more)more.open=false;activePage=page;document.querySelectorAll('[data-section]').forEach(el=>{el.hidden=!el.dataset.section.split(' ').includes(page)});document.querySelectorAll('[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));document.querySelectorAll('.mobile-nav button').forEach(el=>el.classList.toggle('active',el.dataset.page===page));let titles={dashboard:['Hoje conta, do seu jeito.','Registre o que fez sentido para você e acompanhe seus passos sem comparar sua história com a de ninguém.'],progress:['Meu progresso','Veja suas áreas, metas e registros em um só lugar.'],evolution:['Sua evolução','Compare seus registros e acompanhe suas mudanças.'],reports:['Relatórios','Uma visão clara da sua consistência e evolução.'],about:['Como funciona','Entenda o objetivo do site e como acompanhar seu progresso.'],tips:['Dicas do dia','Ideias simples para apoiar sua rotina.'],support:['Saúde mental','Informações de apoio e caminhos para buscar ajuda.'],day:['Meu dia','Check-in, diário e pequenas metas — tudo no mesmo lugar.'],community:['Comunidade','Compartilhe sua experiência com cuidado e leia outros relatos.'],staff:['Central da equipe','Acesso restrito a administradores, analistas e suporte.'],myProfile:['Meu perfil','Personalize sua página e escolha o que compartilhar.'],profile:['Perfil da comunidade','Uma página personalizada para compartilhar com cuidado.']};if(!['about','tips','support','day'].includes(page)){document.getElementById('pageTitle').textContent=titles[page][0];document.getElementById('pageSubtitle').textContent=titles[page][1]}renderEntries();if(page==='evolution')renderEvolution();if(page==='day'){renderJournal();renderCare()}if(page==='myProfile'){renderCommunityProfile();if(typeof currentUser!=='undefined'&&currentUser)void loadCommunityProfile()}if(page==='community'){void loadCommunityFeed()}if(page==='staff'&&typeof loadStaffConsole==='function')void loadStaffConsole();window.scrollTo({top:0,behavior:'smooth'});document.dispatchEvent(new CustomEvent('mp:page',{detail:page}))}
 document.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>showPage(el.dataset.page)));
 const chartPeriod=document.getElementById('chartPeriod'),periodTrigger=document.getElementById('chartPeriodTrigger'),periodLabel=document.getElementById('chartPeriodLabel'),periodMenu=document.getElementById('chartPeriodMenu'),periodOptions=[...periodMenu.querySelectorAll('[data-period]')];chartPeriod.onchange=renderChart;function closePeriodMenu(returnFocus=false){periodMenu.hidden=true;periodTrigger.setAttribute('aria-expanded','false');if(returnFocus)periodTrigger.focus()}periodTrigger.addEventListener('click',()=>{const opening=periodMenu.hidden;periodMenu.hidden=!opening;periodTrigger.setAttribute('aria-expanded',String(opening));if(opening)periodOptions.find(option=>option.dataset.period===chartPeriod.value)?.focus()});periodOptions.forEach((option,index)=>{option.addEventListener('click',()=>{chartPeriod.value=option.dataset.period;periodLabel.textContent=option.textContent;periodOptions.forEach(item=>item.setAttribute('aria-checked',String(item===option)));chartPeriod.dispatchEvent(new Event('change'));closePeriodMenu(true)});option.addEventListener('keydown',event=>{let next=null;if(event.key==='ArrowDown')next=(index+1)%periodOptions.length;else if(event.key==='ArrowUp')next=(index-1+periodOptions.length)%periodOptions.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=periodOptions.length-1;else if(event.key==='Escape'){event.preventDefault();closePeriodMenu(true)}if(next!==null){event.preventDefault();periodOptions[next].focus()}})});periodTrigger.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();if(periodMenu.hidden)periodTrigger.click();else periodOptions.find(option=>option.dataset.period===chartPeriod.value)?.focus()}});document.addEventListener('click',event=>{if(!event.target.closest('.period-picker'))closePeriodMenu()});document.getElementById('period').onchange=()=>{renderStats();toast('Resumo atualizado: '+document.getElementById('period').selectedOptions[0].text)};
 document.getElementById('addArea').onclick=()=>{document.getElementById('newAreaForm').reset();document.getElementById('newAreaError').textContent='';document.getElementById('newAreaDialog').showModal()};document.getElementById('seeAll').onclick=()=>showPage('progress');
@@ -266,7 +266,101 @@ function openEvolutionPortal(leaving=false){
  portalTimer=setTimeout(()=>portal.classList.remove('portal-active'),1600);
 }
 </script>
-<link rel="stylesheet" href="community-social.css"><script src="community-social.js"></script></body></html>
+<link rel="stylesheet" href="community-social.css"><script src="community-social.js"></script>
+<style>
+#firstVisitGuide{box-sizing:border-box;width:min(440px,calc(100% - 32px));max-height:calc(100dvh - 32px);padding:24px;border-radius:22px;border:1px solid #c5d8cd;background:#f7faf9;color:#283f39}
+#firstVisitGuide::backdrop{background:#1d303b80;backdrop-filter:blur(4px)}
+#firstVisitGuide h2{font-size:1.35em;margin:0 0 12px}
+#firstVisitGuide p,#firstVisitGuide li{line-height:1.6}
+#firstVisitGuide ul{padding-left:1.25em;margin-bottom:20px}
+#firstVisitGuide li+li{margin-top:8px}
+#firstVisitGuide form{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+#firstVisitGuide button{min-height:44px}
+body.dark-mode #firstVisitGuide{background:#28313f;color:#eff5f0;border-color:#789185}
+body.high-contrast #firstVisitGuide{background:#151515;color:white;border-color:white}
+</style>
+<dialog id="firstVisitGuide" aria-labelledby="guideTitle" aria-describedby="guideIntro">
+  <h2 id="guideTitle"></h2>
+  <p id="guideIntro"></p>
+  <ul id="guideSteps"></ul>
+  <form method="dialog">
+    <button type="submit" class="select-small" autofocus>Pular</button>
+    <button type="submit" class="add-btn">Entendi</button>
+  </form>
+</dialog>
+<script>
+(function setupFirstVisitGuides() {
+  const guides = {
+    dashboard: ['Painel', 'Aqui você vê um resumo da sua evolução.',
+      'Toque em “Novo registro” para anotar o que fez hoje.',
+      'No gráfico, escolha um período para ver seus pontos.'],
+    progress: ['Meu progresso', 'Aqui ficam suas áreas, metas e registros.',
+      'Use “Nova área” para adicionar algo que quer acompanhar, como Estudos.',
+      'Associe seus próximos registros a essa área para acompanhar a meta.'],
+    day: ['Meu dia', 'Use este espaço para anotar como você está e o que viveu hoje.',
+      'No check-in, escolha seu humor e nível de energia.',
+      'No diário, escolha a data, escreva sua anotação e salve.'],
+    community: ['Comunidade', 'Explore o feed de relatos e encontre temas que interessam a você.',
+      'Toque em “Criar publicação” para testar um relato, com opção de anonimato.',
+      'Use Apoiar, Comentar ou Salvar nos cartões. Na demonstração, tudo fica neste navegador.'],
+    myProfile: ['Meu perfil', 'Personalize seu espaço na comunidade.',
+      'Escolha um nome de usuário e como quer ser chamado.',
+      'Adicione uma descrição, se quiser, e salve. Seu perfil começa privado.'],
+    profile: ['Perfil da comunidade', 'Veja como a pessoa escolheu se apresentar.',
+      'Leia os detalhes e os relatos disponíveis no perfil.',
+      'Use “Voltar à comunidade” para retornar ao feed.'],
+    reports: ['Relatórios', 'Acompanhe a frequência dos seus registros e veja como seus pontos mudaram.',
+      'Escolha o período no gráfico.',
+      'Veja o foco da semana para saber em quantos dias você registrou algum passo.'],
+    tips: ['Dicas do dia', 'Encontre uma ideia simples para o seu momento.',
+      'Escolha como você está se sentindo.',
+      'Toque em “Me dê uma ideia” e adapte a sugestão à sua rotina.'],
+    support: ['Saúde mental', 'Encontre informações e opções de apoio.',
+      'Leia os cartões para conhecer as opções disponíveis.',
+      'Na busca por atendimento, digite sua região para procurar serviços próximos.'],
+    about: ['Como funciona', 'Conheça a proposta do Meu Progresso.',
+      'Leia a página para entender como o site ajuda a acompanhar seus passos.',
+      'Use o menu para voltar ao Painel e fazer seu primeiro registro.'],
+    evolution: ['Sua evolução', 'Compare suas semanas e veja mudanças nas suas áreas.',
+      'A análise libera depois de duas semanas com registros.',
+      'Escolha um período para explorar seus dados. Para sair, use “Voltar ao meu espaço”.'],
+    staff: ['Central da equipe', 'Aqui ficam as ferramentas disponíveis para sua função.',
+      'Use as abas da central para alternar entre as ferramentas às quais você tem acesso.']
+  };
+  const dialog = document.getElementById('firstVisitGuide');
+  const seen = new Set();
+  const key = 'mp_seen_guide_';
+  let timer;
+  function hasSeen(page) {
+    try { return seen.has(page) || localStorage.getItem(key + page) === '1'; }
+    catch { return seen.has(page); }
+  }
+  function showGuide(page) {
+    const guide = guides[page];
+    if (!guide || hasSeen(page) || activePage !== page || dialog.open) return;
+    const [title, intro, ...steps] = guide;
+    dialog.querySelector('#guideTitle').textContent = 'Como usar · ' + title;
+    dialog.querySelector('#guideIntro').textContent = intro;
+    dialog.querySelector('#guideSteps').replaceChildren(...steps.map(step => {
+      const item = document.createElement('li');
+      item.textContent = step;
+      return item;
+    }));
+    dialog.showModal();
+    seen.add(page);
+    try { localStorage.setItem(key + page, '1'); } catch {}
+  }
+  function scheduleGuide(page) {
+    clearTimeout(timer);
+    const portalActive = document.querySelector('#evolutionPortal.portal-active');
+    if (portalActive) timer = setTimeout(() => showGuide(page), 1650);
+    else showGuide(page);
+  }
+  document.addEventListener('mp:page', event => scheduleGuide(event.detail));
+  scheduleGuide(activePage);
+})();
+</script>
+</body></html>
 
 
 

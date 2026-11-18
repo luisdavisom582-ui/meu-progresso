@@ -1,4 +1,4 @@
-const CACHE_NAME = "meu-progresso-demo-v14";
+const CACHE_NAME = "meu-progresso-demo-v15";
 const APP_SHELL = ["./", "./index.html", "./editorial.css", "./community-social.css", "./community-social.js", "./manifest.webmanifest", "./icon.svg", "./privacidade.html", "./termos.html", "./cookies.html", "./reembolsos.html"];
 
 self.addEventListener("install", (event) => {
