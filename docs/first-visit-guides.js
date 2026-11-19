@@ -39,15 +39,29 @@
   };
   const dialog = document.getElementById('firstVisitGuide');
   const seen = new Set();
+  const syncing = new Set();
   const key = 'mp_seen_guide_';
   let timer;
   function hasSeen(page) {
-    try { return seen.has(page) || window.mpAccountStorage.getItem(key + page) === '1'; }
-    catch { return seen.has(page); }
+    if (seen.has(page) || window.mpGuideProgress.hasSeen(key + page)) return true;
+    try { return window.mpAccountStorage.getItem(key + page) === '1'; }
+    catch { return false; }
+  }
+  function syncSeen(page) {
+    if (syncing.has(page) || window.mpGuideProgress.hasSeen(key + page)) return;
+    syncing.add(page);
+    window.mpGuideProgress.markSeen(key + page)
+      .catch(() => {})
+      .finally(() => syncing.delete(page));
   }
   function showGuide(page) {
     const guide = guides[page];
-    if (!guide || hasSeen(page) || activePage !== page || dialog.open) return;
+    if (!guide || activePage !== page || document.body.classList.contains('entry-locked')) return;
+    if (hasSeen(page)) {
+      syncSeen(page);
+      return;
+    }
+    if (dialog.open) return;
     const [title, intro, ...steps] = guide;
     dialog.querySelector('#guideTitle').textContent = 'Como usar · ' + title;
     dialog.querySelector('#guideIntro').textContent = intro;
@@ -59,6 +73,7 @@
     dialog.showModal();
     seen.add(page);
     try { window.mpAccountStorage.setItem(key + page, '1'); } catch {}
+    syncSeen(page);
   }
   function scheduleGuide(page) {
     clearTimeout(timer);
@@ -67,5 +82,5 @@
     else showGuide(page);
   }
   document.addEventListener('mp:page', event => scheduleGuide(event.detail));
-  scheduleGuide(activePage);
+  document.addEventListener('mp:entry-ready', () => scheduleGuide(activePage), { once: true });
 })();
