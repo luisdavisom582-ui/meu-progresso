@@ -47,8 +47,8 @@ body.dark-mode .urgent-panel{background:#1b2420;border-color:#46554a;color:var(-
 .cookie-notice{position:fixed;z-index:25;left:18px;bottom:18px;width:min(620px,calc(100vw - 36px));padding:18px;background:var(--paper);color:var(--ink);border:2px solid var(--green);border-radius:14px;box-shadow:0 12px 40px #0003}.cookie-notice[hidden]{display:none}.cookie-notice h2{font-size:16px;margin:0 0 5px}.cookie-notice p{margin:0 0 10px;font-size:13px;color:#45534a;line-height:1.5}.cookie-notice a{color:#174b38;font-weight:700}.cookie-actions{display:flex;gap:9px;flex-wrap:wrap}.cookie-actions button{border:2px solid #174b38;border-radius:8px;padding:8px 12px;background:#fff;color:#174b38;font-weight:700}.cookie-actions button:first-child{background:#174b38;color:#fff}body.dark-mode .cookie-notice{background:#1b2420;border-color:#b8e3c4;color:#edf3ee}body.dark-mode .cookie-notice p{color:#d3e1d6}body.dark-mode .cookie-notice a{color:#c3e5cd}body.dark-mode .cookie-actions button{background:#202b25;color:#c3e5cd;border-color:#c3e5cd}body.dark-mode .cookie-actions button:first-child{background:#215b45;color:#fff}
 @media(max-width:700px){.cookie-notice{left:10px;bottom:80px;width:calc(100vw - 20px);padding:14px}.cookie-actions>*{flex:1}.legal-footer{padding-bottom:8px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-</style><link rel="stylesheet" href="editorial.css">
-<style>.demo-notice{padding:12px 20px;background:#e4ecdf;border-bottom:1px solid #c2d0bc;color:#30452f;text-align:center;font:13px/1.6 system-ui}.demo-notice strong{font-weight:700}#accountButton{display:none!important}</style><style> .live-identity{display:grid;gap:6px;border:1px solid #82938b;border-radius:12px;padding:8px 12px;margin:0}#authModal,#communityProfileForm [hidden]{display:none!important}body.entry-locked > :not(#entryGate),#entryGate[hidden]{display:none!important}</style><link rel="stylesheet" href="./entrada.css?v=31"><script src="./entrada.js?v=32" defer></script><style>
+</style><link rel="stylesheet" href="editorial.css?v=33">
+<style>.demo-notice{padding:12px 20px;background:#e4ecdf;border-bottom:1px solid #c2d0bc;color:#30452f;text-align:center;font:13px/1.6 system-ui}.demo-notice strong{font-weight:700}#accountButton{display:none!important}</style><style> .live-identity{display:grid;gap:6px;border:1px solid #82938b;border-radius:12px;padding:8px 12px;margin:0}#authModal,#communityProfileForm [hidden]{display:none!important}body.entry-locked > :not(#entryGate),#entryGate[hidden]{display:none!important}</style><link rel="stylesheet" href="./entrada.css?v=31"><script src="./entrada.js?v=33" defer></script><style>
 .live-post-actions{display:flex;flex-wrap:wrap;gap:8px}
 .live-post-actions button[aria-pressed=true]{color:#215542;background:#dcefe4;border-color:#8ab8a0}
 .live-comments{margin-top:12px;padding-top:10px;border-top:1px solid #91a69a66}
@@ -147,7 +147,7 @@ body.dark-mode .urgent-panel{background:#1b2420;border-color:#46554a;color:var(-
 
 <link rel="stylesheet" href="./month-goal.css?v=32">
 <dialog id="monthGoalDialog" class="area-dialog month-goal" aria-labelledby="monthGoalTitle">
-<div class="area-dialog-head"><h2 id="monthGoalTitle">Meta do mês</h2><form method="dialog"><button type="submit" class="area-dialog-close" aria-label="Fechar meta do mês">×</button></form></div>
+<div class="area-dialog-head"><h2 id="monthGoalTitle" tabindex="-1">Meta do mês</h2><form method="dialog"><button type="submit" class="area-dialog-close" aria-label="Fechar meta do mês">×</button></form></div>
 <div class="month-picker">
 <button type="button" id="monthPrevious" class="select-small" aria-label="Mês anterior">‹</button>
 <strong id="monthLabel"></strong>

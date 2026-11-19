@@ -1693,3 +1693,32 @@ body.dark-mode .community-optional{border-color:#718477}
 /* Returning through the portal closes the circle. */
 .evolution-portal.portal-closing .portal-ring{animation-name:portal-return}
 @keyframes portal-return{0%{transform:scale(8) rotate(60deg);opacity:0}20%{opacity:1}75%{opacity:1}100%{transform:scale(0) rotate(-30deg);opacity:0}}
+
+button:is(.area-dialog-close, .profile-crop-close, .urgent-close, .social-dialog-head > [data-close]) {
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid #b7c9c3;
+  border-radius: 50%;
+  background: #eef4f2;
+  color: #294842;
+  font: 400 26px/1 system-ui, sans-serif;
+  box-shadow: none !important;
+  transform: none !important;
+}
+button:is(.area-dialog-close, .profile-crop-close, .urgent-close, .social-dialog-head > [data-close]):focus-visible {
+  outline: 2px solid #48786b !important;
+  outline-offset: 2px !important;
+}
+body.dark-mode button:is(.area-dialog-close, .profile-crop-close, .urgent-close, .social-dialog-head > [data-close]) {
+  background: #34454b;
+  border-color: #75948d;
+  color: #f1f7f5;
+}
+#monthGoalTitle:focus { outline: none !important; }

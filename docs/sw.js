@@ -1,6 +1,6 @@
 const CACHE_PREFIX = 'meu-progresso-demo-';
-const CACHE_NAME = CACHE_PREFIX + 'v32';
-const APP_SHELL = ["./","./index.html","./entrada.js?v=32","./entrada.css?v=31","./editorial.css","./community-social.css?v=22","./community-live.js?v=25","./community.js?v=profile4","./community-review.js?v=5","./manifest.webmanifest","./icon.svg","./privacidade.html","./termos.html","./cookies.html","./reembolsos.html","./app-core.js?v=32","./mobile-access.js","./help-controls.js","./help-position.js","./page-motion.js","./area-dialog.js?v=31","./month-goal.js?v=32","./month-goal.css?v=32","./evolution.js?v=29","./evolution-portal.js","./first-visit-guides.js?v=30"];
+const CACHE_NAME = CACHE_PREFIX + 'v33';
+const APP_SHELL = ["./","./index.html","./entrada.js?v=33","./entrada.css?v=31","./editorial.css?v=33","./community-social.css?v=22","./community-live.js?v=25","./community.js?v=profile4","./community-review.js?v=5","./manifest.webmanifest","./icon.svg","./privacidade.html","./termos.html","./cookies.html","./reembolsos.html","./app-core.js?v=32","./mobile-access.js","./help-controls.js","./help-position.js","./page-motion.js?v=33","./area-dialog.js?v=31","./month-goal.js?v=33","./month-goal.css?v=32","./evolution.js?v=29","./evolution-portal.js","./first-visit-guides.js?v=30"];
 const SHELL_URLS = new Set(APP_SHELL.map(path => new URL(path, self.registration.scope).href));
 
 self.addEventListener("install", (event) => {

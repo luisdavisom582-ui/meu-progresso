@@ -133,6 +133,7 @@
     status.textContent = '';
     render();
     dialog.showModal();
+    byId('monthGoalTitle').focus({ preventScroll: true });
   });
   byId('monthPrevious').addEventListener('click', () => moveMonth(-1));
   byId('monthNext').addEventListener('click', () => moveMonth(1));
