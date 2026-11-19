@@ -39,8 +39,8 @@
     const area = areas.find(item => String(item.id) === trigger.dataset.editArea);
     if (area) open(area, trigger);
   });
-  dialog.querySelector('.area-dialog-close').onclick = () => dialog.close();
-  dialog.querySelector('.area-dialog-cancel').onclick = () => dialog.close();
+  dialog.querySelector('.area-dialog-close').onclick = () => window.mpCloseDialog(dialog);
+  dialog.querySelector('.area-dialog-cancel').onclick = () => window.mpCloseDialog(dialog);
   dialog.addEventListener('close', () => (opener?.isConnected ? opener : addButton).focus());
   form.addEventListener('input', clearError);
 
@@ -80,7 +80,7 @@
     areas = updated;
     render();
     opener = [...list.querySelectorAll('[data-edit-area]')].find(button => button.dataset.editArea === String(area.id));
-    dialog.close();
+    window.mpCloseDialog(dialog);
     if (currentUser) void persistAreaCloud(area);
     toast(previous ? 'Área atualizada.' : 'Área criada.');
   });

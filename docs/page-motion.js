@@ -20,7 +20,70 @@
     group.clear();
   }
 
+  let pendingPage;
+  let pageTimer;
+  const closingDialogs = new Map();
+
+  function finishPage() {
+    clearTimeout(pageTimer);
+    const change = pendingPage;
+    pendingPage = undefined;
+    main.classList.remove('tab-leaving');
+    change?.();
+  }
+
+  window.mpLeavePage = change => {
+    if (reduce.matches || document.body.classList.contains('entry-locked')) {
+      change();
+      return;
+    }
+    pendingPage = change;
+    if (!main.classList.contains('tab-leaving')) {
+      main.classList.add('tab-leaving');
+      pageTimer = setTimeout(finishPage, 240);
+    }
+  };
+
+  window.mpCloseDialog = (dialog, value) => {
+    if (!dialog.open || closingDialogs.has(dialog)) return;
+    if (reduce.matches) {
+      dialog.close(value);
+      return;
+    }
+    const finish = () => {
+      clearTimeout(closingDialogs.get(dialog)?.timer);
+      closingDialogs.delete(dialog);
+      dialog.classList.remove('dialog-leaving');
+      if (dialog.open) dialog.close(value);
+    };
+    dialog.classList.add('dialog-leaving');
+    closingDialogs.set(dialog, { finish, timer: setTimeout(finish, 240) });
+  };
+
+  document.addEventListener('submit', event => {
+    if (event.target.closest('dialog.dialog-leaving')) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+  document.addEventListener('submit', event => {
+    const form = event.target;
+    if (event.defaultPrevented || (event.submitter?.getAttribute('formmethod') || form.method) !== 'dialog') return;
+    const dialog = form.closest('dialog[open]');
+    if (!dialog) return;
+    event.preventDefault();
+    window.mpCloseDialog(dialog, event.submitter?.value);
+  });
+  document.addEventListener('cancel', event => {
+    if (!event.target.matches('dialog[open]') || event.defaultPrevented) return;
+    event.preventDefault();
+    window.mpCloseDialog(event.target);
+  }, true);
+
   function animatePage() {
+    clearTimeout(pageTimer);
+    pendingPage = undefined;
+    main.classList.remove('tab-leaving');
     openingSections.forEach(section => section.classList.remove(pageClass));
     openingSections = [];
     cancel(scrollAnimations);
@@ -55,6 +118,8 @@
 
   reduce.addEventListener('change', () => {
     if (reduce.matches) {
+      if (pendingPage) finishPage();
+      closingDialogs.forEach(({ finish }) => finish());
       openingSections.forEach(section => section.classList.remove(pageClass));
       openingSections = [];
       cancel(scrollAnimations);

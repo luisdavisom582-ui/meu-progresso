@@ -275,7 +275,7 @@
     get('liveError').textContent = '';
     dialog.showModal();
   });
-  get('liveCancel').addEventListener('click', () => dialog.close());
+  get('liveCancel').addEventListener('click', () => window.mpCloseDialog(dialog));
   get('liveReload').addEventListener('click', () => refresh());
   get('liveReview').addEventListener('click', async () => {
     try { await loadQueue(); }
@@ -306,7 +306,7 @@
       });
       if (!result?.ok) throw new Error(result?.error || 'Não foi possível enviar o relato.');
       form.reset();
-      dialog.close();
+      window.mpCloseDialog(dialog);
       if (result.published) {
         status.textContent = 'Relato publicado no mural.';
         try { await loadPosts(); }
