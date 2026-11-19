@@ -1,10 +1,10 @@
 (() => {
   const endpoint = "https://aydwfcmxegcucmmspvib.supabase.co";
   const key = "sb_publishable_PxgmhZDEQLjUsLQT6Bw6Ww_hDGeYgJh";
-  const scripts = ["./app-core.js?v=30","./mobile-access.js","./help-controls.js","./help-position.js","./page-motion.js","./area-dialog.js","./evolution.js?v=29","./evolution-portal.js","community-live.js?v=25","./first-visit-guides.js?v=30","community.js?v=profile4","community-review.js?v=5"];
+  const scripts = ["./app-core.js?v=31","./mobile-access.js","./help-controls.js","./help-position.js","./page-motion.js","./area-dialog.js?v=31","./evolution.js?v=29","./evolution-portal.js","community-live.js?v=25","./first-visit-guides.js?v=30","community.js?v=profile4","community-review.js?v=5"];
   const sessionKey = 'mp:entry:session:v1';
   const gate = document.getElementById('entryGate');
-  const form = document.getElementById('entryForm');
+  const form = document.getElementById('accountEntryForm');
   const fields = form.querySelector('fieldset');
   const status = document.getElementById('entryStatus');
   const toggle = document.getElementById('entryToggle');
@@ -37,7 +37,7 @@
     creating = signup;
     document.getElementById('entryForgot').hidden = signup;
     document.getElementById('entryRemember').hidden = signup;
-    document.getElementById('entryTitle').textContent = signup ? 'Crie sua conta' : 'Entre na sua conta';
+    document.getElementById('accountEntryTitle').textContent = signup ? 'Crie sua conta' : 'Entre na sua conta';
     document.getElementById('entryIntro').textContent = signup ? 'Seu nome e e-mail ficam vinculados à conta no Supabase. Seu diário e suas metas ficam neste navegador.' : 'Entre para acessar seu espaço.';
     document.getElementById('nameField').hidden = !signup;
     document.getElementById('entryTerms').hidden = !signup;
@@ -252,7 +252,7 @@
     forgot.hidden = true;
     recoveryForm.hidden = reset;
     resetForm.hidden = !reset;
-    document.getElementById('entryTitle').textContent = reset ? 'Crie uma nova senha' : 'Recupere sua senha';
+    document.getElementById('accountEntryTitle').textContent = reset ? 'Crie uma nova senha' : 'Recupere sua senha';
     document.getElementById('entryIntro').textContent = reset ? 'Use pelo menos 8 caracteres.' : 'Informe o e-mail da sua conta.';
   }
   function backToLogin(message = '') {

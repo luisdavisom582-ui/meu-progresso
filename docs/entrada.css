@@ -7,10 +7,10 @@ body.entry-locked > :not(#entryGate){display:none!important}
 .entry-card h1{margin:0;font-size:clamp(24px,6vw,32px);line-height:1.15}
 #entryStatus:empty{display:none}
 #entryStatus{padding:10px 12px;border-radius:10px;background:#e8f1eb}
-#entryForm fieldset{padding:0;border:0;min-width:0}
-#entryForm label{display:block;margin:0 0 14px;font-weight:650}
-#entryForm input:not([type=checkbox]){box-sizing:border-box;display:block;width:100%;margin-top:5px;padding:11px;border:1px solid #a9beb2;border-radius:10px;font:inherit}
-#entryForm .entry-agreement{display:flex;gap:8px;font-size:14px;font-weight:400;align-items:baseline}
+#accountEntryForm fieldset{padding:0;border:0;min-width:0}
+#accountEntryForm label{display:block;margin:0 0 14px;font-weight:650}
+#accountEntryForm input:not([type=checkbox]){box-sizing:border-box;display:block;width:100%;margin-top:5px;padding:11px;border:1px solid #a9beb2;border-radius:10px;font:inherit}
+#accountEntryForm .entry-agreement{display:flex;gap:8px;font-size:14px;font-weight:400;align-items:baseline}
 .entry-card button{min-height:44px;border-radius:10px;border:1px solid #a9beb2;padding:8px 14px;font:inherit;cursor:pointer}
 .entry-submit{width:100%;background:#315f49;color:white}
 #entryToggle{margin-top:10px;width:100%;background:white;color:#315f49}
