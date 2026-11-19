@@ -1,0 +1,55 @@
+.area-row .area-edit-button {
+  display: block;
+  margin-left: auto;
+  min-width: 38px;
+  min-height: 32px;
+  padding: 0;
+  color: inherit;
+  font-size: .75rem;
+  text-decoration: underline;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  border-radius: 4px;
+}
+.area-row .area-edit-button:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+.month-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.month-summary h2, .month-summary p { margin: 0; overflow-wrap: anywhere; }
+.month-goal { max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain; }
+.month-goal input, .month-goal select { width: 100%; box-sizing: border-box; }
+.month-picker { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-block: 12px; }
+.month-picker strong { text-transform: capitalize; }
+.month-fields { display: grid; gap: 8px; margin-block: 14px; }
+.month-fields > button { justify-self: start; }
+.month-fields h3 { margin: 0; }
+.month-weekdays, .month-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; text-align: center; }
+.month-weekdays { font-size: .75rem; margin-bottom: 4px; }
+.month-days button {
+  min-width: 0;
+  min-height: 38px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+}
+.month-days button:disabled { opacity: .42; cursor: default; }
+.month-days button[data-state="done"] { background: #d9eee3; color: #194d3e; border-color: #88b4a5; }
+.month-days button[data-state="missed"] { background: #f6e3dd; color: #6c352b; border-color: #cba69c; }
+.month-days button[aria-pressed="true"] { outline: 2px solid currentColor; outline-offset: -3px; }
+.month-days button:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
+.month-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+#monthDayOptions, .month-result { margin-top: 14px; }
+#monthAreaInputs { display: grid; gap: 6px; }
+#monthAreaInputs label { display: grid; grid-template-columns: minmax(0, 1fr) 6ch; align-items: center; gap: 10px; overflow-wrap: anywhere; }
+#monthStatus:empty { display: none; }
+.month-goal #monthAreaInputs input { padding-inline: 5px; }
+.month-goal .month-days button { padding: 0 2px; }
