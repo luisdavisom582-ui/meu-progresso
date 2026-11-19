@@ -1,7 +1,8 @@
 (function gentlePageMotion() {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   const main = document.getElementById('mainContent');
-  const pageAnimations = new Map();
+  const pageClass = 'tab-opening';
+  let openingSections = [];
   const scrollAnimations = new Map();
 
   function animate(element, frames, duration, group) {
@@ -20,16 +21,21 @@
   }
 
   function animatePage() {
-    cancel(pageAnimations);
+    openingSections.forEach(section => section.classList.remove(pageClass));
+    openingSections = [];
     cancel(scrollAnimations);
     if (reduce.matches || document.body.classList.contains('entry-locked') ||
         document.querySelector('#evolutionPortal.portal-active')) return;
 
-    main.querySelectorAll(':scope > [data-section]:not([hidden])').forEach(section => {
-      animate(section, [{ opacity: .55, translate: '0 7px' }, { opacity: 1, translate: '0 0' }], 290, pageAnimations);
-    });
+    openingSections = [...main.querySelectorAll(':scope > [data-section]:not([hidden])')];
+    // Restart even when two tabs share a section.
+    void main.offsetWidth;
+    openingSections.forEach(section => section.classList.add(pageClass));
   }
 
+  main.addEventListener('animationend', event => {
+    if (event.animationName === 'mp-tab-in') event.target.classList.remove(pageClass);
+  });
   document.addEventListener('mp:page', animatePage);
   document.addEventListener('mp:entry-ready', animatePage, { once: true });
 
@@ -38,7 +44,7 @@
       entries.forEach(({ isIntersecting, target }) => {
         if (!isIntersecting || reduce.matches || !target.getBoundingClientRect().height) return;
         observer.unobserve(target);
-        const opening = [...pageAnimations.keys()].some(section => section.contains(target));
+        const opening = openingSections.some(section => section.classList.contains(pageClass) && section.contains(target));
         if (!opening && !document.querySelector('#evolutionPortal.portal-active')) {
           animate(target, [{ opacity: .65 }, { opacity: 1 }], 380, scrollAnimations);
         }
@@ -49,7 +55,8 @@
 
   reduce.addEventListener('change', () => {
     if (reduce.matches) {
-      cancel(pageAnimations);
+      openingSections.forEach(section => section.classList.remove(pageClass));
+      openingSections = [];
       cancel(scrollAnimations);
     }
   });

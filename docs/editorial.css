@@ -1722,3 +1722,28 @@ body.dark-mode button:is(.area-dialog-close, .profile-crop-close, .urgent-close,
   color: #f1f7f5;
 }
 #monthGoalTitle:focus { outline: none !important; }
+
+@media (prefers-reduced-motion: no-preference) {
+  #mainContent > .tab-opening[data-section]:not([hidden]) {
+    animation: mp-tab-in 440ms cubic-bezier(.2,.68,.27,1) both !important;
+  }
+
+  dialog.area-dialog[open],
+  dialog.social-dialog[open],
+  dialog#firstVisitGuide[open],
+  .modal-backdrop.open > .modal,
+  .profile-crop-modal:not([hidden]) > .profile-crop-card,
+  .urgent-widget[open] > .urgent-panel {
+    animation: mp-dialog-in 340ms cubic-bezier(.2,.68,.27,1) both;
+  }
+}
+
+@keyframes mp-tab-in {
+  from { opacity: .28; translate: 0 12px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+@keyframes mp-dialog-in {
+  from { opacity: .2; transform: translateY(12px) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
